@@ -1,10 +1,301 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Data Viz Site</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SF Crime Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #07090f;
+      --card-bg: rgba(255,255,255,0.03);
+      --card-border: rgba(255,255,255,0.08);
+      --text-primary: #e8eaf0;
+      --text-secondary: #8892a4;
+      --text-muted: #4a5568;
+      --accent: #3b82f6;
+      --accent-rgb: 59, 130, 246;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(ellipse 900px 600px at 50% -80px, rgba(59,130,246,0.09) 0%, transparent 70%),
+        linear-gradient(rgba(255,255,255,0.017) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.017) 1px, transparent 1px);
+      background-size: 100% auto, 48px 48px, 48px 48px;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── NAV ─────────────────────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; height: 60px;
+      background: rgba(7,9,15,0.88);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      display: flex; align-items: center;
+      padding: 0 2.5rem; z-index: 999;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-primary); text-decoration: none;
+    }
+    .nav-brand-icon {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, var(--accent), rgba(var(--accent-rgb),0.5));
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nav-brand-icon svg { width: 16px; height: 16px; color: #fff; }
+    .nav-links { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+    .nav-links a {
+      padding: 6px 14px; border-radius: 8px;
+      font-size: 0.8rem; font-weight: 500; color: var(--text-secondary);
+      text-decoration: none; transition: all 0.2s;
+    }
+    .nav-links a:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
+    .nav-links a.active { background: rgba(var(--accent-rgb),0.12); color: var(--accent); }
+
+    /* ── HERO ────────────────────────────────────────────────────────── */
+    .hero {
+      padding: 148px 2rem 72px;
+      text-align: center;
+      position: relative;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(var(--accent-rgb),0.1);
+      border: 1px solid rgba(var(--accent-rgb),0.28);
+      color: var(--accent);
+      padding: 5px 16px; border-radius: 100px;
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.07em;
+      text-transform: uppercase; margin-bottom: 32px;
+    }
+    .hero-badge::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); flex-shrink: 0;
+      animation: blink 2.4s ease-in-out infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    h1 {
+      font-size: clamp(2.8rem, 5.5vw, 4.8rem);
+      font-weight: 800; line-height: 1.08;
+      letter-spacing: -0.035em; margin-bottom: 24px;
+    }
+    .gradient-text {
+      background: linear-gradient(120deg, #60a5fa 0%, var(--accent) 40%, #818cf8 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: 1.05rem; color: var(--text-secondary); font-weight: 400;
+      max-width: 540px; margin: 0 auto 64px; line-height: 1.75;
+    }
+
+    /* ── SECTION LABEL ───────────────────────────────────────────────── */
+    .section-label {
+      text-align: center;
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    /* ── CARDS ───────────────────────────────────────────────────────── */
+    .cards-section {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 2rem 100px;
+    }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px; padding: 30px;
+      text-decoration: none; color: var(--text-primary);
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1),
+                  box-shadow 0.3s cubic-bezier(0.4,0,0.2,1),
+                  border-color 0.3s;
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .card-glow {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(var(--c-rgb),0.07) 0%, transparent 55%);
+      opacity: 0; transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .card:hover { transform: translateY(-5px); }
+    .card:hover .card-glow { opacity: 1; }
+    .card:hover { border-color: rgba(var(--c-rgb),0.32); box-shadow: 0 24px 60px rgba(0,0,0,0.45), 0 0 32px rgba(var(--c-rgb),0.1); }
+
+    .card-purple { --c-rgb: 168,85,247; }
+    .card-teal   { --c-rgb: 20,184,166; }
+    .card-amber  { --c-rgb: 245,158,11; }
+
+    .card-icon {
+      width: 48px; height: 48px; border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(var(--c-rgb),0.1);
+      border: 1px solid rgba(var(--c-rgb),0.22);
+      margin-bottom: 20px; flex-shrink: 0;
+      color: rgba(var(--c-rgb),1);
+    }
+    .card-icon svg { width: 24px; height: 24px; }
+
+    .card-type {
+      font-size: 0.67rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; padding: 3px 10px; border-radius: 100px;
+      margin-bottom: 14px; display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(var(--c-rgb),0.1);
+      border: 1px solid rgba(var(--c-rgb),0.2);
+      color: rgba(var(--c-rgb),1);
+      width: fit-content;
+    }
+
+    .card h2 {
+      font-size: 1.2rem; font-weight: 700; margin-bottom: 10px;
+      letter-spacing: -0.02em; line-height: 1.3;
+    }
+    .card p {
+      font-size: 0.86rem; color: var(--text-secondary);
+      line-height: 1.72; flex: 1; margin-bottom: 24px;
+    }
+    .card-cta {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.8rem; font-weight: 600;
+      color: rgba(var(--c-rgb),1);
+      transition: gap 0.2s;
+    }
+    .card:hover .card-cta { gap: 10px; }
+    .card-cta svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+    /* ── FOOTER ──────────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 32px 2rem;
+      text-align: center;
+      color: var(--text-muted); font-size: 0.78rem;
+    }
+    footer a { color: var(--text-secondary); text-decoration: none; }
+    footer a:hover { color: var(--text-primary); }
+  </style>
 </head>
 <body>
-    <h1>Hello World!</h1>
-    <p>This site will soon contain interactive data visualizations about crime in San Francisco.</p>
+
+<nav>
+  <a href="index.html" class="nav-brand">
+    <div class="nav-brand-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+    </div>
+    SF Crime Analytics
+  </a>
+  <div class="nav-links">
+    <a href="index.html" class="active">Home</a>
+    <a href="pages/interactive-hourly.html">Hourly Crime</a>
+    <a href="pages/interactive-heatmap.html">Crime Heatmap</a>
+    <a href="pages/static-crime-ratio.html">Crime by District</a>
+  </div>
+</nav>
+
+<main>
+  <section class="hero">
+    <div class="hero-badge">Group 75 &nbsp;·&nbsp; Social Data Analysis</div>
+    <h1>San Francisco<br><span class="gradient-text">Crime Analytics</span></h1>
+    <p class="hero-sub">
+      Interactive and static visualizations uncovering crime patterns across
+      San Francisco's districts, neighborhoods, and time periods.
+    </p>
+  </section>
+
+  <section class="cards-section">
+    <p class="section-label">Visualizations</p>
+    <div class="cards-grid">
+
+      <a href="pages/interactive-hourly.html" class="card card-purple">
+        <div class="card-glow"></div>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <span class="card-type">
+          <svg viewBox="0 0 10 10" fill="currentColor" width="7" height="7"><circle cx="5" cy="5" r="5"/></svg>
+          Interactive · Plotly
+        </span>
+        <h2>Hourly Crime Patterns</h2>
+        <p>Explore how crime distribution shifts across San Francisco's police districts throughout each hour of the day via an animated choropleth map.</p>
+        <span class="card-cta">
+          View visualization
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </span>
+      </a>
+
+      <a href="pages/interactive-heatmap.html" class="card card-teal">
+        <div class="card-glow"></div>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+            <circle cx="12" cy="9" r="2.5"/>
+          </svg>
+        </div>
+        <span class="card-type">
+          <svg viewBox="0 0 10 10" fill="currentColor" width="7" height="7"><circle cx="5" cy="5" r="5"/></svg>
+          Interactive · Folium
+        </span>
+        <h2>Geographic Crime Heatmap</h2>
+        <p>Discover crime density hotspots across San Francisco's neighborhoods on an interactive Leaflet map with precise geospatial clustering.</p>
+        <span class="card-cta">
+          View visualization
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </span>
+      </a>
+
+      <a href="pages/static-crime-ratio.html" class="card card-amber">
+        <div class="card-glow"></div>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 5-5"/>
+          </svg>
+        </div>
+        <span class="card-type">
+          <svg viewBox="0 0 10 10" fill="currentColor" width="7" height="7"><circle cx="5" cy="5" r="5"/></svg>
+          Static · Matplotlib
+        </span>
+        <h2>Crime Ratio by District</h2>
+        <p>A comparative breakdown of crime distribution ratios across San Francisco's police districts, visualized with clarity and precision.</p>
+        <span class="card-cta">
+          View visualization
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </span>
+      </a>
+
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Group 75 &nbsp;·&nbsp; <a href="https://www.dtu.dk" target="_blank" rel="noopener">DTU</a> Social Data Analysis &amp; Visualization &nbsp;·&nbsp; 2026</p>
+</footer>
+
 </body>
 </html>
