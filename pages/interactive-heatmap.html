@@ -110,6 +110,52 @@
       color: var(--text-secondary);
     }
 
+    /* ── THEME TOGGLE ────────────────────────────────────────────────── */
+    .theme-btn {
+      width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.06);
+      color: var(--text-secondary);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; margin-left: 8px;
+    }
+    .theme-btn:hover { background: rgba(255,255,255,0.13); color: var(--text-primary); }
+    .theme-btn svg { width: 16px; height: 16px; pointer-events: none; }
+    .icon-sun { display: none; }
+    [data-theme="light"] .icon-sun { display: block; }
+    [data-theme="light"] .icon-moon { display: none; }
+
+    /* ── LIGHT MODE ───────────────────────────────────────────────────── */
+    html[data-theme="light"] {
+      --bg: #f0fdfb;
+      --text-primary: #0a1f1d;
+      --text-secondary: #2d6b65;
+      --text-muted: #7ab5b0;
+    }
+    html[data-theme="light"] body {
+      background-image:
+        radial-gradient(ellipse 900px 550px at 50% -60px, rgba(20,184,166,0.14) 0%, transparent 70%),
+        linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+    }
+    html[data-theme="light"] nav {
+      background: rgba(240,253,251,0.92);
+      border-bottom-color: rgba(0,0,0,0.07);
+    }
+    html[data-theme="light"] .nav-links a:hover { background: rgba(0,0,0,0.06); }
+    html[data-theme="light"] .page-header { border-bottom-color: rgba(0,0,0,0.07); }
+    html[data-theme="light"] .tag-neutral {
+      background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1);
+    }
+    html[data-theme="light"] .plot-frame {
+      border-color: rgba(0,0,0,0.1);
+      box-shadow: 0 0 0 1px rgba(var(--accent-rgb),0.1), 0 28px 70px rgba(0,0,0,0.1), 0 0 60px rgba(var(--accent-rgb),0.08);
+    }
+    html[data-theme="light"] .theme-btn {
+      border-color: rgba(0,0,0,0.1); background: rgba(0,0,0,0.05);
+    }
+    html[data-theme="light"] .theme-btn:hover { background: rgba(0,0,0,0.1); }
+
     /* ── PLOT AREA ───────────────────────────────────────────────────── */
     .plot-wrapper {
       flex: 1; min-height: 0;
@@ -146,6 +192,18 @@
     <a href="interactive-heatmap.html" class="active">Crime Heatmap</a>
     <a href="static-crime-ratio.html">Crime by District</a>
   </div>
+  <button class="theme-btn" id="themeToggle" aria-label="Toggle light/dark mode">
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="5"/>
+      <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+      <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </svg>
+  </button>
 </nav>
 
 <div class="page-header">
@@ -184,5 +242,17 @@
   </div>
 </div>
 
+<script>
+  (function() {
+    var html = document.documentElement;
+    var stored = localStorage.getItem('sf-theme');
+    if (stored) html.setAttribute('data-theme', stored);
+    document.getElementById('themeToggle').addEventListener('click', function() {
+      var next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('sf-theme', next);
+    });
+  })();
+</script>
 </body>
 </html>
