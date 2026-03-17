@@ -8,4 +8,4 @@ You must always:
 
 You must never:
 1. Generate code that can not be embedded directly in HTML.
-2. Pick a completely new theme for a page unless explicitly told to do so.
+2. Pick a completely new theme for a page (besides changing color scheme) unless explicitly told to do so.

@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Crime by Category &amp; Year — SF Crime Analytics</title>
+  <title>Crime Risk — SF Crime Analytics</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0f0608;
+      --bg: #09060f;
       --card-border: rgba(255,255,255,0.08);
-      --text-primary: #f6e9ec;
-      --text-secondary: #a4858b;
-      --text-muted: #6b444a;
-      --accent: #f43f5e;
-      --accent-rgb: 244, 63, 94;
+      --text-primary: #ede9f6;
+      --text-secondary: #8b85a4;
+      --text-muted: #49446b;
+      --accent: #a855f7;
+      --accent-rgb: 168, 85, 247;
     }
 
     html, body { height: 100%; overflow: hidden; }
@@ -24,7 +24,7 @@
     body {
       background-color: var(--bg);
       background-image:
-        radial-gradient(ellipse 900px 550px at 50% -60px, rgba(244,63,94,0.1) 0%, transparent 70%),
+        radial-gradient(ellipse 900px 550px at 50% -60px, rgba(168,85,247,0.1) 0%, transparent 70%),
         linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
       background-size: 100% auto, 48px 48px, 48px 48px;
@@ -38,7 +38,7 @@
       flex-shrink: 0; height: 60px;
       background: rgba(9,6,15,0.9);
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(244,63,94,0.1);
+      border-bottom: 1px solid rgba(168,85,247,0.1);
       display: flex; align-items: center;
       padding: 0 2rem; position: relative; z-index: 99;
     }
@@ -49,7 +49,7 @@
     }
     .nav-brand-icon {
       width: 28px; height: 28px;
-      background: linear-gradient(135deg, #f43f5e, rgba(244,63,94,0.4));
+      background: linear-gradient(135deg, #a855f7, rgba(168,85,247,0.4));
       border-radius: 7px;
       display: flex; align-items: center; justify-content: center;
     }
@@ -142,8 +142,8 @@
   </a>
   <div class="nav-links">
     <a href="../index.html">Home</a>
-    <a href="interactive-hourly.html">Hourly Crime</a>
-    <a href="interactive-hourly-2.html" class="active">Crime by Category</a>
+    <a href="interactive-risk.html" class="active">Crime Risk</a>
+    <a href="interactive-hourly.html">Crime by Hour</a>
     <a href="interactive-heatmap.html">Crime Heatmap</a>
     <a href="static-crime-ratio.html">Crime by District</a>
   </div>
@@ -153,33 +153,32 @@
   <div class="breadcrumb">
     <a href="../index.html">Home</a>
     <span class="breadcrumb-sep">›</span>
-    <span>Crime by Category &amp; Year</span>
+    <span>Crime Risk per district</span>
   </div>
   <div class="header-main">
     <div class="header-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
       </svg>
     </div>
     <div class="header-text">
-      <h1>Crime by Category &amp; Year</h1>
-      <p>Animated line chart tracking normalized hourly frequency of personal-focus crimes across San Francisco from 2003 to 2025</p>
+      <h1>Crime Risk per district</h1>
+      <p>Animated choropleth showing crime distribution by district across San Francisco</p>
     </div>
   </div>
   <div class="tags">
     <span class="tag">Interactive</span>
     <span class="tag">Plotly</span>
-    <span class="tag tag-neutral">Line Chart</span>
-    <span class="tag tag-neutral">Year Animation</span>
-    <span class="tag tag-neutral">2003–2025</span>
+    <span class="tag tag-neutral">Choropleth Map</span>
+    <span class="tag tag-neutral">Time Animation</span>
   </div>
 </div>
 
 <div class="plot-wrapper">
   <div class="plot-frame">
     <iframe
-      src="../interactive_plots/crime_hourly_interactive_2.html"
-      title="Hourly Distribution of Personal Focus Crimes by Year"
+      src="../interactive_plots/crime_risk.html"
+      title="Crime Risk per district"
       loading="lazy">
     </iframe>
   </div>
