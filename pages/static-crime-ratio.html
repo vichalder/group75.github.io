@@ -303,17 +303,6 @@
   <p>Group 75 &nbsp;&middot;&nbsp; <a href="https://www.dtu.dk" target="_blank" rel="noopener">DTU</a> Social Data Analysis &amp; Visualization &nbsp;&middot;&nbsp; 2026</p>
 </footer>
 
-<script>
-  (function() {
-    var html = document.documentElement;
-    var stored = localStorage.getItem('sf-theme');
-    if (stored) html.setAttribute('data-theme', stored);
-    document.getElementById('themeToggle').addEventListener('click', function() {
-      var next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-      html.setAttribute('data-theme', next);
-      localStorage.setItem('sf-theme', next);
-    });
-  })();
-</script>
+<script src="../js/theme.js"></script>
 </body>
 </html>

@@ -7,6 +7,8 @@ This is the webiste of group 75. We have soooo much cool stuff.
 ```
 group75.github.io/
 ├── index.html                                        # Landing page
+├── js/
+│   └── theme.js                                      # Shared light/dark mode logic
 ├── pages/
 │   ├── interactive-risk.html                       # Hourly Crime Patterns (choropleth map)
 │   ├── interactive-hourly.html                     # Crime by Category & Year (line chart, 2003–2025)

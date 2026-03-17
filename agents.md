@@ -29,7 +29,8 @@
 * **Known Architectural Quirks:**
   - CSS theme variables (`--bg`, `--accent`, `--text-primary`, etc.) are defined in the `<head>` of each standalone page — no shared stylesheet
   - The `interactive_plots/` directory holds raw Plotly/Folium HTML embeds; the `pages/` directory holds the styled wrapper pages that iframe or include them
-  - All CSS and JS must be embedded inline — no external build steps or separated asset files
+  - All CSS and JS should generally be embedded inline — no external build steps or separated asset files.
+  - Exception: `js/theme.js` is a shared asset used for the light/dark mode toggle across all pages.
   - Google Fonts (`Inter`) is loaded via `<link>` in `index.html` (this is an approved external resource)
 
 ## Execution Plan
