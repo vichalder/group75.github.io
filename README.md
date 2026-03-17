@@ -1,3 +1,21 @@
-# group75.github.io
+# Group 75
 
 This is the webiste of group 75. We have soooo much cool stuff.
+
+## File Tree
+
+```
+group75.github.io/
+├── index.html                                        # Landing page
+├── pages/
+│   ├── interactive-hourly.html                       # Hourly Crime Patterns (choropleth map)
+│   ├── interactive-hourly-2.html                     # Crime by Category & Year (line chart, 2003–2025)
+│   ├── interactive-heatmap.html                      # Geographic Crime Heatmap (Folium)
+│   └── static-crime-ratio.html                       # Crime Ratio by District (Matplotlib)
+├── interactive_plots/
+│   ├── crime_hourly_interactive.html                 # Plotly choropleth embed
+│   ├── crime_hourly_interactive_2.html               # Plotly animated line chart embed
+│   └── sf_crime_heatmap.html                         # Folium heatmap embed
+└── static_plots/
+    └── crime_ratio_per_district.png                  # Matplotlib bar chart image
+```
