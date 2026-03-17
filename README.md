@@ -20,4 +20,6 @@ group75.github.io/
 │   └── sf_crime_heatmap.html                         # Folium heatmap embed
 └── static_plots/
     └── crime_ratio_per_district.png                  # Matplotlib bar chart image
+├── tests/
+    └── run_theme_tests.py                          # Automated theme toggle tests
 ```
