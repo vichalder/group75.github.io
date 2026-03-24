@@ -55,8 +55,12 @@
 ## Agent Hand-off Notes
 *Agents: Use this scratchpad to document known bugs, blockers, context limitations, or specific instructions for the next agent that picks up the task.*
 
-* **2026-03-24 - Claude Sonnet 4.6:** Added data story page "The Larceny Wave".
-    * *Notes:* Created `pages/larceny-story.html` — fully self-contained narrative page with 3 Chart.js visualizations (annual timeseries bar chart, district risk ratio horizontal bar with reference line plugin, day×hour heatmap grid). Uses Chart.js 4.4.4 CDN. Red/crimson accent scheme (`--accent: #ef4444`). All data is embedded (extracted/approximated from notebook narrative). Theme-reactive charts via MutationObserver. Added crimson card to `index.html`. Updated nav in all 6 pages + `index.html`. Updated `README.md` and `agents.md`.
+* **2026-03-24 - Claude Sonnet 4.6:** Added data story page "The Larceny Wave" + real-data export pipeline.
+    * *Notes:*
+      - Created `pages/larceny-story.html` — narrative article page with 3 embedded Chart.js visualisations (annual timeseries bar chart, district risk ratio horizontal bar with custom reference-line plugin, 7×24 day×hour heatmap grid). Uses Chart.js 4.4.4 CDN. Red/crimson accent scheme (`--accent: #ef4444`). Theme-reactive charts via MutationObserver. Added crimson card to `index.html`. Updated nav in all 6 pages + `index.html`.
+      - Added export cell to `things_to_put_on_website.ipynb` (cell id `wc21ysrzbma`): running the notebook writes `larceny_data.js` to the repo root containing real YEARS, COUNTS, DISTRICTS, RATIOS and HEATMAP arrays derived from the SFPD dataset.
+      - `pages/larceny-story.html` loads `../larceny_data.js` via `<script src>` with `onerror="void 0"` fallback. If the file is present, all three charts use real data; if absent, plausible placeholder estimates are used silently.
+      - Data file lives at repo root (`larceny_data.js`); it is **not** committed — regenerate by running the notebook against `../../Data/2003_2026.csv`.
     * *Blockers:* None
 
 * **2026-03-24 - Claude Sonnet 4.6:** Added animated heatmap page.
