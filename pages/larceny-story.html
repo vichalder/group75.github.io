@@ -289,7 +289,7 @@
     }
     .legend-bar {
       width: 120px; height: 10px; border-radius: 5px;
-      background: linear-gradient(to right, #1e1a1a, #ef4444);
+      background: linear-gradient(to right, #ffffcc, #fed976, #fd8d3c, #e31a1c, #800026);
     }
 
     /* ── TOOLTIP ─────────────────────────────────────────────────────── */
@@ -570,7 +570,7 @@
     </div>
     <p class="figure-caption">
       <strong>Figure 3.</strong> Larceny theft heatmap by hour of day (columns) and day of week (rows),
-      2003–2025. Darker red cells indicate more incidents. Hover over any cell to see the day, time window,
+      2003–2025. Darker red/orange cells indicate more incidents; lighter yellow cells indicate fewer. Hover over any cell to see the day, time window,
       and approximate incident count. The afternoon surge (12:00–18:00) is visible across all days, with
       Friday and Saturday afternoons representing the city's highest-risk windows.
     </p>
@@ -861,17 +861,27 @@
 
     function cellColor(val) {
       const t = Math.pow((val - heatMin) / (heatMax - heatMin), 0.65);
-      if (isDark()) {
-        const r = Math.round(25  + t * (239 - 25));
-        const g = Math.round(15  + t * (68  - 15));
-        const b = Math.round(15  + t * (68  - 15));
-        return `rgb(${r},${g},${b})`;
-      } else {
-        const r = Math.round(240 - t * (240 - 180));
-        const g = Math.round(240 - t * (240 - 30));
-        const b = Math.round(240 - t * (240 - 30));
-        return `rgb(${r},${g},${b})`;
-      }
+      // YlOrRd9 palette: light yellow → orange → dark red
+      const palette = [
+        [255, 255, 204],  // #ffffcc
+        [255, 237, 160],  // #ffeda0
+        [254, 217, 118],  // #fed976
+        [254, 178,  76],  // #feb24c
+        [253, 141,  60],  // #fd8d3c
+        [252,  78,  42],  // #fc4e2a
+        [227,  26,  28],  // #e31a1c
+        [189,   0,  38],  // #bd0026
+        [128,   0,  38],  // #800026
+      ];
+      const n = palette.length - 1;
+      const pos = t * n;
+      const i = Math.min(Math.floor(pos), n - 1);
+      const f = pos - i;
+      const c0 = palette[i], c1 = palette[i + 1];
+      const r = Math.round(c0[0] + f * (c1[0] - c0[0]));
+      const g = Math.round(c0[1] + f * (c1[1] - c0[1]));
+      const b = Math.round(c0[2] + f * (c1[2] - c0[2]));
+      return `rgb(${r},${g},${b})`;
     }
 
     const grid = document.createElement('div');
