@@ -25,7 +25,7 @@
 *Agents: Update this section to reflect the current reality of the codebase so newly instantiated agents have immediate context.*
 
 * **Current Primary Goal:** Develop and expand the SF Crime Analytics data visualisation website for Group 75
-* **Latest Major Change:** Light/Dark mode toggle added to the site
+* **Latest Major Change:** Added `pages/interactive-heatmap-animated.html` — Animated Crime Heatmap (Leaflet, year slider 2003–2025, crime-type filter)
 * **Known Architectural Quirks:**
   - CSS theme variables (`--bg`, `--accent`, `--text-primary`, etc.) are defined in the `<head>` of each standalone page — no shared stylesheet
   - The `interactive_plots/` directory holds raw Plotly/Folium HTML embeds; the `pages/` directory holds the styled wrapper pages that iframe or include them
@@ -49,9 +49,14 @@
 - [x] Added `pages/interactive-risk.html` — Hourly Crime Patterns choropleth map
 - [x] Added `pages/static-crime-ratio.html` — Crime Ratio by District (Matplotlib image)
 - [x] Light/Dark mode toggle added to the site
+- [x] Added `pages/interactive-heatmap-animated.html` — Animated Crime Heatmap wrapping `interactive_plots/crime_heatmap.html`
 
 ## Agent Hand-off Notes
 *Agents: Use this scratchpad to document known bugs, blockers, context limitations, or specific instructions for the next agent that picks up the task.*
+
+* **2026-03-24 - Claude Sonnet 4.6:** Added animated heatmap page.
+    * *Notes:* Created `pages/interactive-heatmap-animated.html` wrapping `interactive_plots/crime_heatmap.html` (Leaflet, year slider 2003–2025, crime-type dropdown). Added sky-blue card to `index.html`. Updated nav in all 5 pages + `index.html`.
+    * *Blockers:* None
 
 * **2026-03-17 - Claude Sonnet 4.6:** Initialised this file with current project state.
     * *Notes:* Project is a static GitHub Pages site. All pages follow a dark-mode-first design. The `AI_rulebook.md` file has been deleted (tracked as `D` in git status) — it has been superseded by this `agents.md` file.
