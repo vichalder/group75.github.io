@@ -140,11 +140,12 @@
     .card:hover .card-glow { opacity: 1; }
     .card:hover { border-color: rgba(var(--c-rgb),0.32); box-shadow: 0 24px 60px rgba(0,0,0,0.45), 0 0 32px rgba(var(--c-rgb),0.1); }
 
-    .card-purple { --c-rgb: 168,85,247; }
-    .card-rose   { --c-rgb: 244,63,94; }
-    .card-teal   { --c-rgb: 20,184,166; }
-    .card-amber  { --c-rgb: 245,158,11; }
-    .card-sky    { --c-rgb: 14,165,233; }
+    .card-purple  { --c-rgb: 168,85,247; }
+    .card-rose    { --c-rgb: 244,63,94; }
+    .card-teal    { --c-rgb: 20,184,166; }
+    .card-amber   { --c-rgb: 245,158,11; }
+    .card-sky     { --c-rgb: 14,165,233; }
+    .card-crimson { --c-rgb: 220,38,38; }
 
     .card-icon {
       width: 48px; height: 48px; border-radius: 13px;
@@ -260,6 +261,7 @@
     <a href="pages/interactive-heatmap.html">Crime Heatmap</a>
     <a href="pages/interactive-heatmap-animated.html">Animated Heatmap</a>
     <a href="pages/static-crime-ratio.html">Crime by District</a>
+    <a href="pages/larceny-story.html">Larceny Wave</a>
   </div>
   <button class="theme-btn" id="themeToggle" aria-label="Toggle light/dark mode">
     <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -389,6 +391,28 @@
         <p>A comparative breakdown of crime distribution ratios across San Francisco's police districts, visualized with clarity and precision.</p>
         <span class="card-cta">
           View visualization
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </span>
+      </a>
+
+      <a href="pages/larceny-story.html" class="card card-crimson">
+        <div class="card-glow"></div>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+            <polyline points="13 2 13 9 20 9"/>
+          </svg>
+        </div>
+        <span class="card-type">
+          <svg viewBox="0 0 10 10" fill="currentColor" width="7" height="7"><circle cx="5" cy="5" r="5"/></svg>
+          Data Story · Chart.js
+        </span>
+        <h2>The Larceny Wave</h2>
+        <p>A narrative deep-dive into how larceny theft shaped San Francisco's streets over two decades — with embedded interactive charts exploring time, geography, and patterns.</p>
+        <span class="card-cta">
+          Read the story
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
             <path d="M5 12h14M12 5l7 7-7 7"/>
           </svg>

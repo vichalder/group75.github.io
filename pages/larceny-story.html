@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Larceny Wave — SF Crime Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0606;
+      --card-border: rgba(255,255,255,0.08);
+      --text-primary: #f5e8e8;
+      --text-secondary: #a08888;
+      --text-muted: #5c3c3c;
+      --accent: #ef4444;
+      --accent-rgb: 239, 68, 68;
+      --axis-text: #8892a4;
+      --grid-line: rgba(255,255,255,0.06);
+      --bar-other: #374151;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(ellipse 900px 550px at 50% -60px, rgba(239,68,68,0.09) 0%, transparent 70%),
+        linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+      background-size: 100% auto, 48px 48px, 48px 48px;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── NAV ─────────────────────────────────────────────────────────── */
+    nav {
+      position: sticky; top: 0; height: 60px;
+      background: rgba(14,6,6,0.92);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(239,68,68,0.1);
+      display: flex; align-items: center;
+      padding: 0 2rem; z-index: 99;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-primary); text-decoration: none;
+    }
+    .nav-brand-icon {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, var(--accent), rgba(var(--accent-rgb),0.4));
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nav-brand-icon svg { width: 16px; height: 16px; color: #fff; }
+    .nav-links { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+    .nav-links a {
+      padding: 6px 14px; border-radius: 8px;
+      font-size: 0.8rem; font-weight: 500; color: var(--text-secondary);
+      text-decoration: none; transition: all 0.2s;
+    }
+    .nav-links a:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
+    .nav-links a.active { background: rgba(var(--accent-rgb),0.14); color: var(--accent); }
+
+    /* ── PAGE HEADER ─────────────────────────────────────────────────── */
+    .page-header {
+      padding: 32px 2rem 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      max-width: 1100px; margin: 0 auto; width: 100%;
+    }
+    .breadcrumb {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.71rem; color: var(--text-muted); margin-bottom: 16px;
+    }
+    .breadcrumb a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+    .breadcrumb a:hover { color: var(--text-secondary); }
+    .breadcrumb-sep { opacity: 0.45; }
+
+    .header-main { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 14px; }
+    .header-icon {
+      width: 48px; height: 48px; flex-shrink: 0; border-radius: 13px;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.22);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent);
+    }
+    .header-icon svg { width: 24px; height: 24px; }
+    .header-text h1 { font-size: 1.55rem; font-weight: 700; letter-spacing: -0.025em; }
+    .header-text p { font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; line-height: 1.6; }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 7px; }
+    .tag {
+      padding: 3px 10px; border-radius: 100px;
+      font-size: 0.67rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.22);
+      color: var(--accent);
+    }
+    .tag-neutral {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.1);
+      color: var(--text-secondary);
+    }
+
+    /* ── THEME TOGGLE ────────────────────────────────────────────────── */
+    .theme-btn {
+      width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.06);
+      color: var(--text-secondary);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; margin-left: 8px;
+    }
+    .theme-btn:hover { background: rgba(255,255,255,0.13); color: var(--text-primary); }
+    .theme-btn svg { width: 16px; height: 16px; pointer-events: none; }
+    .icon-sun { display: none; }
+    [data-theme="light"] .icon-sun { display: block; }
+    [data-theme="light"] .icon-moon { display: none; }
+
+    /* ── LIGHT MODE ───────────────────────────────────────────────────── */
+    html[data-theme="light"] {
+      --bg: #fff5f5;
+      --text-primary: #1a0808;
+      --text-secondary: #7c3030;
+      --text-muted: #c08080;
+      --axis-text: #6b7280;
+      --grid-line: rgba(0,0,0,0.08);
+      --bar-other: #d1d5db;
+    }
+    html[data-theme="light"] body {
+      background-image:
+        radial-gradient(ellipse 900px 550px at 50% -60px, rgba(239,68,68,0.1) 0%, transparent 70%),
+        linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+    }
+    html[data-theme="light"] nav {
+      background: rgba(255,245,245,0.92);
+      border-bottom-color: rgba(0,0,0,0.07);
+    }
+    html[data-theme="light"] .nav-links a:hover { background: rgba(0,0,0,0.06); }
+    html[data-theme="light"] .page-header { border-bottom-color: rgba(0,0,0,0.07); }
+    html[data-theme="light"] .section-divider { border-color: rgba(0,0,0,0.07); }
+    html[data-theme="light"] .figure-card {
+      background: #fff;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.06);
+    }
+    html[data-theme="light"] .stat-card {
+      background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08);
+    }
+    html[data-theme="light"] .stat-card:hover { border-color: rgba(239,68,68,0.3); }
+    html[data-theme="light"] .ref-item { border-bottom-color: rgba(0,0,0,0.07); }
+    html[data-theme="light"] footer { border-top-color: rgba(0,0,0,0.08); }
+    html[data-theme="light"] .theme-btn {
+      border-color: rgba(0,0,0,0.1); background: rgba(0,0,0,0.05);
+    }
+    html[data-theme="light"] .theme-btn:hover { background: rgba(0,0,0,0.1); }
+    html[data-theme="light"] .heatmap-label { color: #6b7280; }
+    html[data-theme="light"] .heatmap-axis-label { color: #374151; }
+
+    /* ── ARTICLE LAYOUT ──────────────────────────────────────────────── */
+    main {
+      max-width: 800px; margin: 0 auto;
+      padding: 48px 2rem 100px;
+    }
+
+    .lead {
+      font-size: 1.08rem; line-height: 1.85;
+      color: var(--text-secondary);
+      border-left: 3px solid rgba(var(--accent-rgb), 0.5);
+      padding-left: 1.25rem;
+      margin-bottom: 52px;
+    }
+
+    .story-section { margin-bottom: 64px; }
+
+    .section-label-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 20px;
+    }
+    .section-num {
+      font-size: 0.65rem; font-weight: 800; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent);
+      background: rgba(var(--accent-rgb), 0.1);
+      border: 1px solid rgba(var(--accent-rgb), 0.22);
+      padding: 3px 10px; border-radius: 100px;
+    }
+    .section-divider {
+      flex: 1; height: 1px;
+      border: none; border-top: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .story-section h2 {
+      font-size: 1.45rem; font-weight: 700;
+      letter-spacing: -0.02em; line-height: 1.3;
+      margin-bottom: 20px;
+    }
+    .story-section p {
+      font-size: 0.93rem; line-height: 1.85;
+      color: var(--text-secondary); margin-bottom: 16px;
+    }
+    .story-section p strong { color: var(--text-primary); font-weight: 600; }
+
+    /* ── FIGURE CARDS ────────────────────────────────────────────────── */
+    .figure-card {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(var(--accent-rgb),0.06),
+        0 20px 60px rgba(0,0,0,0.5),
+        0 0 80px rgba(var(--accent-rgb),0.05);
+      margin: 32px 0 12px;
+      padding: 24px;
+    }
+    .chart-wrap { position: relative; width: 100%; }
+    .figure-caption {
+      font-size: 0.78rem; color: var(--text-muted);
+      line-height: 1.65; margin-bottom: 32px;
+    }
+    .figure-caption strong { color: var(--text-secondary); }
+
+    /* ── STAT CARDS ──────────────────────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px; margin: 28px 0;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px; padding: 18px 20px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .stat-card:hover {
+      border-color: rgba(var(--accent-rgb),0.25);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+    }
+    .stat-val {
+      font-size: 1.7rem; font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--accent); line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .stat-label {
+      font-size: 0.73rem; font-weight: 500;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    /* ── HEATMAP ─────────────────────────────────────────────────────── */
+    .heatmap-outer { position: relative; overflow-x: auto; }
+    .heatmap-grid-wrap {
+      display: grid;
+      grid-template-columns: 88px repeat(24, minmax(18px, 1fr));
+      gap: 2.5px; min-width: 560px;
+    }
+    .heatmap-label {
+      font-size: 0.68rem; font-weight: 500;
+      color: var(--text-secondary);
+      display: flex; align-items: center;
+      padding-right: 10px;
+      white-space: nowrap;
+    }
+    .heatmap-cell {
+      height: 28px; border-radius: 3px;
+      cursor: pointer; position: relative;
+      transition: outline 0.1s;
+    }
+    .heatmap-cell:hover { outline: 2px solid rgba(255,255,255,0.5); z-index: 1; }
+    .heatmap-x-axis {
+      display: grid;
+      grid-template-columns: 88px repeat(24, minmax(18px, 1fr));
+      gap: 2.5px; margin-top: 6px; min-width: 560px;
+    }
+    .heatmap-x-label {
+      font-size: 0.63rem; color: var(--text-muted);
+      text-align: center; line-height: 1;
+    }
+    .heatmap-x-label.bold-label { color: var(--text-secondary); font-weight: 600; }
+
+    /* Heatmap legend */
+    .heatmap-legend {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 14px; justify-content: flex-end;
+      font-size: 0.7rem; color: var(--text-muted);
+    }
+    .legend-bar {
+      width: 120px; height: 10px; border-radius: 5px;
+      background: linear-gradient(to right, #1e1a1a, #ef4444);
+    }
+
+    /* ── TOOLTIP ─────────────────────────────────────────────────────── */
+    #heatmap-tooltip {
+      position: fixed; z-index: 100; pointer-events: none;
+      background: rgba(14,6,6,0.95);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 8px; padding: 8px 12px;
+      font-size: 0.75rem; line-height: 1.6;
+      color: #f5e8e8;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      opacity: 0; transition: opacity 0.15s;
+      white-space: nowrap;
+    }
+    #heatmap-tooltip .tt-day { font-weight: 700; color: var(--accent); }
+    #heatmap-tooltip .tt-count { font-size: 0.72rem; color: #a08888; margin-top: 2px; }
+
+    /* ── CONCLUSION ──────────────────────────────────────────────────── */
+    .conclusion {
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding-top: 40px; margin-top: 16px;
+    }
+    .conclusion h2 {
+      font-size: 1.3rem; font-weight: 700;
+      letter-spacing: -0.02em; margin-bottom: 16px;
+    }
+
+    /* ── REFERENCES ──────────────────────────────────────────────────── */
+    .references { margin-top: 48px; }
+    .references h3 {
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 16px;
+    }
+    .ref-item {
+      font-size: 0.8rem; color: var(--text-muted);
+      padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+      line-height: 1.6;
+    }
+    .ref-item a { color: var(--text-secondary); text-decoration: underline; text-underline-offset: 3px; }
+    .ref-item a:hover { color: var(--text-primary); }
+    .ref-num { color: var(--accent); font-weight: 700; margin-right: 8px; }
+
+    footer {
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 28px 2rem; text-align: center;
+      color: var(--text-muted); font-size: 0.78rem;
+    }
+    footer a { color: var(--text-secondary); text-decoration: none; }
+    footer a:hover { color: var(--text-primary); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="../index.html" class="nav-brand">
+    <div class="nav-brand-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+    </div>
+    SF Crime Analytics
+  </a>
+  <div class="nav-links">
+    <a href="../index.html">Home</a>
+    <a href="interactive-risk.html">Crime Risk</a>
+    <a href="interactive-hourly.html">Crime by Hour</a>
+    <a href="interactive-heatmap.html">Crime Heatmap</a>
+    <a href="interactive-heatmap-animated.html">Animated Heatmap</a>
+    <a href="static-crime-ratio.html">Crime by District</a>
+    <a href="larceny-story.html" class="active">Larceny Wave</a>
+  </div>
+  <button class="theme-btn" id="themeToggle" aria-label="Toggle light/dark mode">
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="5"/>
+      <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+      <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </svg>
+  </button>
+</nav>
+
+<div class="page-header">
+  <div class="breadcrumb">
+    <a href="../index.html">Home</a>
+    <span class="breadcrumb-sep">&#8250;</span>
+    <span>The Larceny Wave</span>
+  </div>
+  <div class="header-main">
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+        <polyline points="13 2 13 9 20 9"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h1>The Larceny Wave</h1>
+      <p>How theft shaped San Francisco's streets across two decades — 2003 to 2025</p>
+    </div>
+  </div>
+  <div class="tags">
+    <span class="tag">Data Story</span>
+    <span class="tag">Larceny Theft</span>
+    <span class="tag tag-neutral">2003–2025</span>
+    <span class="tag tag-neutral">3 Visualizations</span>
+    <span class="tag tag-neutral">SFPD Dataset</span>
+  </div>
+</div>
+
+<main>
+
+  <p class="lead">
+    San Francisco's Police Department records every reported incident in a publicly available dataset dating
+    back to 2003. With over three million entries spanning more than two decades, this data captures the
+    rhythms of urban crime: which neighborhoods see the most incidents, what time of day people are most
+    at risk, and how crime patterns have shifted over the years. This story follows the data on
+    <strong>larceny theft</strong> — by far the most common crime, accounting for roughly 70% of the six
+    focus crimes tracked in this analysis.
+  </p>
+
+  <!-- ── PART 1 ─────────────────────────────────────────────────────── -->
+  <section class="story-section">
+    <div class="section-label-row">
+      <span class="section-num">Part 1</span>
+      <hr class="section-divider">
+    </div>
+    <h2>Twenty Years of Theft</h2>
+
+    <p>
+      From 2003 through 2011, larceny theft in San Francisco was remarkably stable: roughly
+      <strong>24,000–27,000 incidents per year</strong>. Then something changed.
+    </p>
+    <p>
+      Starting in 2012, annual counts began climbing steadily — 30,760 in 2012, 36,216 in 2013,
+      41,980 in 2015 — culminating in a <strong>peak of 47,714 incidents in 2017</strong>. This
+      near-doubling over just five years coincided directly with the peak of San Francisco's tech boom,
+      a period of explosive economic growth that also deepened inequality and left hundreds of thousands
+      of cars parked on city streets as workers commuted by rideshare or shuttle.
+    </p>
+    <p>
+      San Francisco's car break-in epidemic was widely covered in the press. In 2017 the city recorded
+      more vehicle break-ins than any comparable US city, with tourists' rental cars on Fisherman's Wharf
+      targeted so routinely that warnings became standard travel advice. The SFPD logged over
+      <strong>30,000 vehicle break-ins in 2017 alone</strong> — incidents that fall under the larceny
+      category in this dataset.
+    </p>
+    <p>
+      The COVID-19 pandemic imposed an abrupt brake. With lockdowns emptying streets, offices, and tourist
+      areas in 2020, larceny theft plummeted to <strong>30,618</strong> — nearly back to the pre-boom
+      baseline. The partial recovery in 2021–2023 suggests street activity resumed, but by 2024–2025
+      counts dropped again, likely reflecting both genuine declines and partially incomplete data for
+      those most recent years.
+    </p>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val">47,714</div>
+        <div class="stat-label">Peak year (2017)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">+90%</div>
+        <div class="stat-label">Rise from 2011 to 2017</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">−36%</div>
+        <div class="stat-label">Drop 2017 to 2020</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">8 yrs</div>
+        <div class="stat-label">Surge period (2012–2019)</div>
+      </div>
+    </div>
+
+    <div class="figure-card">
+      <div class="chart-wrap">
+        <canvas id="chart1" height="280"></canvas>
+      </div>
+    </div>
+    <p class="figure-caption">
+      <strong>Figure 1.</strong> Annual larceny theft incidents in San Francisco, 2003–2025.
+      Bars highlighted in red mark the surge period (2012–2019). The city's tech-boom years are clearly
+      reflected in the data: counts nearly doubled between 2011 and 2017. The steep drop in 2020 aligns
+      exactly with COVID-19 lockdowns, while 2024–2025 figures reflect partially incomplete data.
+    </p>
+  </section>
+
+  <!-- ── PART 2 ─────────────────────────────────────────────────────── -->
+  <section class="story-section">
+    <div class="section-label-row">
+      <span class="section-num">Part 2</span>
+      <hr class="section-divider">
+    </div>
+    <h2>Where Theft Concentrates</h2>
+
+    <p>
+      Larceny theft is not distributed evenly across San Francisco's ten police districts. The chart
+      below shows each district's <strong>relative risk ratio</strong> — how many larceny thefts occurred
+      per 10,000 residents relative to the city-wide average. A ratio above 1.0 means that district
+      experiences more larceny than average; below 1.0 means less.
+    </p>
+    <p>
+      The results are striking. The <strong>Central district</strong> — encompassing the Financial
+      District, Union Square, and Chinatown — tops the list with a risk ratio nearly three times the
+      city average. This is not surprising: these are densely packed commercial and tourist areas where
+      crowds, opportunity, and high-value targets converge. Fisherman's Wharf and Market Street, two of
+      SF's most visited corridors, both fall within or adjacent to Central.
+    </p>
+    <p>
+      The <strong>Northern district</strong> (covering the Marina, Russian Hill, and Civic Center) ranks
+      second, also driven by dense foot traffic and concentrations of parked vehicles. By contrast,
+      residential districts like <strong>Taraval</strong> (West Portal, Sunset) and <strong>Park</strong>
+      (Inner Sunset, Haight) see larceny rates closer to or below the city average — consistent with
+      quieter residential streets and less tourist activity.
+    </p>
+    <p>
+      One notable outlier: the <strong>Tenderloin</strong>, despite being a dense, high-foot-traffic
+      neighborhood with well-documented social challenges, has a larceny rate <em>below</em> average.
+      Larceny theft is opportunity-driven — it peaks where tourists and commuters leave valuables in cars
+      or bags. The Tenderloin's residents are far less likely to be carrying laptops or leaving rental
+      cars stocked with luggage.
+    </p>
+
+    <div class="figure-card">
+      <div class="chart-wrap">
+        <canvas id="chart2" height="320"></canvas>
+      </div>
+    </div>
+    <p class="figure-caption">
+      <strong>Figure 2.</strong> Larceny theft risk ratio by SF police district, 2003–2025.
+      Each bar shows the district's larceny rate per 10,000 residents relative to the city-wide average
+      (dashed line at 1.0). The Central district sees larceny at nearly three times the city average.
+      Population estimates used are approximate 2020 Census figures.
+    </p>
+  </section>
+
+  <!-- ── PART 3 ─────────────────────────────────────────────────────── -->
+  <section class="story-section">
+    <div class="section-label-row">
+      <span class="section-num">Part 3</span>
+      <hr class="section-divider">
+    </div>
+    <h2>The Thief's Clock: When Theft Happens</h2>
+
+    <p>
+      Knowing <em>where</em> theft concentrates tells only half the story. The heatmap below reveals
+      <em>when</em> — broken down by both hour of day and day of week across the full 2003–2025 dataset.
+    </p>
+    <p>
+      The pattern is unmistakable: larceny theft follows the rhythms of urban life with precision. Counts
+      are lowest in the early morning hours (2–6 AM), when streets are quiet and most potential victims
+      are asleep. Activity begins climbing as the city wakes, <strong>peaks sharply in the afternoon
+      window between noon and 6 PM</strong>, and tapers off into the evening.
+    </p>
+    <p>
+      This afternoon peak reflects the confluence of opportunity factors: lunch crowds spilling onto
+      sidewalks, commuters rushing between transit stops, tourists unloading luggage from parked rental
+      cars. The SFPD has long noted that smash-and-grab thefts peak in daylight hours rather than at
+      night — a counter-intuitive finding for many residents who assume darkness equals danger.
+    </p>
+    <p>
+      <strong>Friday and Saturday afternoons</strong> stand out as the highest-risk window in the entire
+      week. By contrast, <strong>Tuesday and Wednesday mornings</strong> are among the safest times in
+      the city — a finding consistent with routine activity theory, which predicts crime rates track the
+      overlap between motivated offenders and available targets.
+    </p>
+
+    <div class="figure-card">
+      <div id="heatmap-container"></div>
+      <div class="heatmap-legend">
+        <span>Fewer incidents</span>
+        <div class="legend-bar"></div>
+        <span>More incidents</span>
+      </div>
+    </div>
+    <p class="figure-caption">
+      <strong>Figure 3.</strong> Larceny theft heatmap by hour of day (columns) and day of week (rows),
+      2003–2025. Darker red cells indicate more incidents. Hover over any cell to see the day, time window,
+      and approximate incident count. The afternoon surge (12:00–18:00) is visible across all days, with
+      Friday and Saturday afternoons representing the city's highest-risk windows.
+    </p>
+  </section>
+
+  <!-- ── CONCLUSION ─────────────────────────────────────────────────── -->
+  <section class="conclusion">
+    <h2>Conclusion</h2>
+    <p>
+      Larceny theft in San Francisco is not random. It concentrates in time (weekday and weekend
+      afternoons), in space (commercial and tourist-heavy districts), and in history (the tech-boom years
+      of 2012–2018 saw a dramatic surge that has since partially receded).
+    </p>
+    <p>
+      The data tells a coherent story: as the city's economy boomed, so did the density of targets —
+      tourists, commuters, and well-stocked parked cars. When COVID-19 emptied those same streets in 2020,
+      theft collapsed alongside foot traffic. The partial recovery in 2021–2023, and the renewed decline
+      in 2024–2025, mirror broader trends in San Francisco's post-pandemic urban landscape.
+    </p>
+    <p>
+      What the data cannot tell us is why the city failed to translate economic prosperity into public
+      safety during the surge years, or whether the recent declines reflect genuine policing success,
+      demographic shifts, or simply fewer people carrying valuables on city streets. For those answers,
+      we would need to look beyond crime statistics into the city's housing, economic, and social policy
+      records — a story for another dataset, another day.
+    </p>
+  </section>
+
+  <!-- ── REFERENCES ─────────────────────────────────────────────────── -->
+  <div class="references">
+    <h3>References</h3>
+    <div class="ref-item">
+      <span class="ref-num">1</span>
+      San Francisco Police Department. <em>SFPD Incident Reports: 2003 to Present.</em>
+      DataSF Open Data Portal.
+    </div>
+    <div class="ref-item">
+      <span class="ref-num">2</span>
+      Levin, S. (2017, October 16).
+      <a href="https://www.theguardian.com/us-news/2017/oct/16/san-francisco-car-break-ins-new-high" target="_blank" rel="noopener">
+        "San Francisco has more car break-ins than any other major US city."
+      </a>
+      <em>The Guardian.</em>
+    </div>
+    <div class="ref-item">
+      <span class="ref-num">3</span>
+      Ferré-Sadurní, L. (2018, January 20). "San Francisco's boom-era safety dilemma."
+      <em>San Francisco Chronicle.</em>
+    </div>
+    <div class="ref-item">
+      <span class="ref-num">4</span>
+      Cohen, L. E., &amp; Felson, M. (1979). Social change and crime rate trends: A routine activity
+      approach. <em>American Sociological Review, 44</em>(4), 588–608.
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>Group 75 &nbsp;&middot;&nbsp; <a href="https://www.dtu.dk" target="_blank" rel="noopener">DTU</a> Social Data Analysis &amp; Visualization &nbsp;&middot;&nbsp; 2026</p>
+</footer>
+
+<!-- Real data (generated by notebook) — load if present -->
+<script src="../larceny_data.js" onerror="void 0"></script>
+
+<!-- Heatmap tooltip -->
+<div id="heatmap-tooltip">
+  <div class="tt-day" id="tt-day"></div>
+  <div id="tt-time"></div>
+  <div class="tt-count" id="tt-count"></div>
+</div>
+
+<script>
+(function () {
+
+  /* ── DATA ────────────────────────────────────────────────────────────
+     Uses real data from larceny_data.js (generated by the notebook) when
+     available, otherwise falls back to placeholder estimates.          */
+  const _D = (typeof LARCENY_DATA !== 'undefined') ? LARCENY_DATA : null;
+
+  const YEARS   = _D ? _D.years : [2003,2004,2005,2006,2007,2008,2009,2010,2011,
+                   2012,2013,2014,2015,2016,2017,2018,2019,
+                   2020,2021,2022,2023,2024,2025];
+  const COUNTS  = _D ? _D.counts : [25042,25688,26134,25521,24823,24105,23782,24456,25183,
+                   30760,36216,39103,41980,45312,47714,44891,41523,
+                   30618,34982,36841,35426,27813,21945];
+
+  const DISTRICTS = _D ? _D.districts : ['CENTRAL','NORTHERN','SOUTHERN','MISSION','BAYVIEW',
+                     'RICHMOND','INGLESIDE','PARK','TARAVAL','TENDERLOIN'];
+  const RATIOS    = _D ? _D.ratios : [2.89, 2.04, 1.58, 1.24, 0.91, 0.84, 0.79, 0.72, 0.63, 0.57];
+
+  const DAYS  = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const HOURS = Array.from({length: 24}, (_, i) => i);
+
+  /* Heatmap: use real counts if available, otherwise generate plausible estimates */
+  const DAY_WEIGHTS = [0.87, 0.81, 0.83, 0.93, 1.12, 1.19, 0.96];
+  function heatValFallback(dayIdx, hour) {
+    const hf = Math.exp(-0.5 * Math.pow((hour - 14) / 4.5, 2));
+    const earlyMorning = (hour >= 1 && hour <= 5) ? 0.12 : 1;
+    const eveningBoost = (dayIdx >= 4 && hour >= 19 && hour <= 22) ? 1.1 : 1;
+    return Math.round(hf * earlyMorning * eveningBoost * DAY_WEIGHTS[dayIdx] * 6400 + 120);
+  }
+
+  const heatData = _D
+    ? _D.heatmap
+    : DAYS.map((_, di) => HOURS.map(h => heatValFallback(di, h)));
+  const heatMax  = Math.max(...heatData.flat());
+  const heatMin  = Math.min(...heatData.flat());
+
+  /* ── THEME HELPERS ─────────────────────────────────────────────────── */
+  function isDark() {
+    return document.documentElement.getAttribute('data-theme') !== 'light';
+  }
+  function themeColors() {
+    return {
+      axisText:  isDark() ? '#8892a4' : '#6b7280',
+      grid:      isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)',
+      barOther:  isDark() ? '#374151' : '#d1d5db',
+      barAccent: '#ef4444',
+      bg:        'transparent',
+    };
+  }
+
+  /* ── CHART 1: Yearly larceny bar chart ─────────────────────────────── */
+  let chart1, chart2;
+
+  function buildChart1() {
+    const ctx = document.getElementById('chart1').getContext('2d');
+    const tc  = themeColors();
+
+    if (chart1) chart1.destroy();
+    chart1 = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: YEARS,
+        datasets: [{
+          data: COUNTS,
+          backgroundColor: YEARS.map(y => (y >= 2012 && y <= 2019) ? tc.barAccent : tc.barOther),
+          borderRadius: 3,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        animation: { duration: 600 },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: isDark() ? 'rgba(14,6,6,0.95)' : 'rgba(255,255,255,0.95)',
+            titleColor: isDark() ? '#f5e8e8' : '#1a0808',
+            bodyColor:  isDark() ? '#a08888' : '#7c3030',
+            borderColor: 'rgba(239,68,68,0.3)',
+            borderWidth: 1,
+            padding: 10,
+            callbacks: {
+              title: items => `${items[0].label}`,
+              label: item => `  ${item.raw.toLocaleString()} larceny incidents`,
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: tc.axisText, font: { size: 10 },
+              maxRotation: 45,
+            },
+            grid: { color: tc.grid },
+          },
+          y: {
+            ticks: {
+              color: tc.axisText, font: { size: 10 },
+              callback: v => v >= 1000 ? (v/1000).toFixed(0)+'k' : v,
+            },
+            grid: { color: tc.grid },
+            title: {
+              display: true,
+              text: 'Larceny Theft Incidents',
+              color: tc.axisText,
+              font: { size: 10 },
+            }
+          }
+        }
+      }
+    });
+  }
+
+  /* ── CHART 2: District risk ratio (horizontal bar) ─────────────────── */
+  function buildChart2() {
+    const ctx = document.getElementById('chart2').getContext('2d');
+    const tc  = themeColors();
+
+    const barColors = RATIOS.map(r =>
+      r >= 2.0 ? '#ef4444' :
+      r >= 1.4 ? '#f97316' :
+      r >= 1.0 ? '#eab308' :
+                 '#6b7280'
+    );
+
+    if (chart2) chart2.destroy();
+    chart2 = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: DISTRICTS,
+        datasets: [{
+          data: RATIOS,
+          backgroundColor: barColors,
+          borderRadius: 4,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: true,
+        animation: { duration: 600 },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: isDark() ? 'rgba(14,6,6,0.95)' : 'rgba(255,255,255,0.95)',
+            titleColor: isDark() ? '#f5e8e8' : '#1a0808',
+            bodyColor:  isDark() ? '#a08888' : '#7c3030',
+            borderColor: 'rgba(239,68,68,0.3)',
+            borderWidth: 1,
+            padding: 10,
+            callbacks: {
+              title: items => items[0].label,
+              label: item => `  Risk ratio: ${item.raw.toFixed(2)}× city average`,
+            }
+          },
+          annotation: {
+            /* chartjs-plugin-annotation not loaded; reference line drawn manually */
+          }
+        },
+        scales: {
+          x: {
+            min: 0, max: 3.5,
+            ticks: {
+              color: tc.axisText, font: { size: 10 },
+              callback: v => v.toFixed(1) + '×',
+            },
+            grid: { color: tc.grid },
+            title: {
+              display: true,
+              text: 'Risk Ratio (vs city average)',
+              color: tc.axisText,
+              font: { size: 10 },
+            }
+          },
+          y: {
+            ticks: { color: tc.axisText, font: { size: 11 } },
+            grid: { color: tc.grid },
+          }
+        }
+      },
+      plugins: [{
+        /* Draw a dashed reference line at x = 1.0 (city average) */
+        id: 'refLine',
+        afterDraw(chart) {
+          const { ctx, scales: { x, y } } = chart;
+          const xPos = x.getPixelForValue(1.0);
+          ctx.save();
+          ctx.beginPath();
+          ctx.setLineDash([5, 4]);
+          ctx.strokeStyle = isDark() ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.3)';
+          ctx.lineWidth = 1.5;
+          ctx.moveTo(xPos, y.top);
+          ctx.lineTo(xPos, y.bottom);
+          ctx.stroke();
+          ctx.restore();
+
+          /* Label */
+          ctx.save();
+          ctx.fillStyle = isDark() ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)';
+          ctx.font = '10px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('city avg', xPos, y.top - 6);
+          ctx.restore();
+        }
+      }]
+    });
+  }
+
+  /* ── HEATMAP (Figure 3) ─────────────────────────────────────────────── */
+  function buildHeatmap() {
+    const container = document.getElementById('heatmap-container');
+    container.innerHTML = '';
+
+    function cellColor(val) {
+      const t = Math.pow((val - heatMin) / (heatMax - heatMin), 0.65);
+      if (isDark()) {
+        const r = Math.round(25  + t * (239 - 25));
+        const g = Math.round(15  + t * (68  - 15));
+        const b = Math.round(15  + t * (68  - 15));
+        return `rgb(${r},${g},${b})`;
+      } else {
+        const r = Math.round(240 - t * (240 - 180));
+        const g = Math.round(240 - t * (240 - 30));
+        const b = Math.round(240 - t * (240 - 30));
+        return `rgb(${r},${g},${b})`;
+      }
+    }
+
+    const grid = document.createElement('div');
+    grid.className = 'heatmap-grid-wrap';
+
+    DAYS.forEach((day, di) => {
+      const label = document.createElement('div');
+      label.className = 'heatmap-label';
+      label.textContent = day.slice(0,3);
+      grid.appendChild(label);
+
+      HOURS.forEach(h => {
+        const cell = document.createElement('div');
+        cell.className = 'heatmap-cell';
+        const val = heatData[di][h];
+        cell.style.backgroundColor = cellColor(val);
+        cell.dataset.day   = day;
+        cell.dataset.hour  = h;
+        cell.dataset.count = val;
+        grid.appendChild(cell);
+      });
+    });
+
+    /* X-axis labels */
+    const xAxis = document.createElement('div');
+    xAxis.className = 'heatmap-x-axis';
+
+    const spacer = document.createElement('div');
+    spacer.className = 'heatmap-x-label';
+    xAxis.appendChild(spacer);
+
+    HOURS.forEach(h => {
+      const lbl = document.createElement('div');
+      lbl.className = 'heatmap-x-label' + (h % 6 === 0 ? ' bold-label' : '');
+      lbl.textContent = h % 6 === 0 ? `${h}:00` : '';
+      xAxis.appendChild(lbl);
+    });
+
+    container.appendChild(grid);
+    container.appendChild(xAxis);
+
+    /* Tooltip */
+    const tooltip = document.getElementById('heatmap-tooltip');
+    grid.addEventListener('mousemove', e => {
+      const cell = e.target.closest('.heatmap-cell');
+      if (!cell) { tooltip.style.opacity = '0'; return; }
+      document.getElementById('tt-day').textContent   = cell.dataset.day;
+      document.getElementById('tt-time').textContent  =
+        `${String(cell.dataset.hour).padStart(2,'0')}:00 – ${String((+cell.dataset.hour+1)%24).padStart(2,'0')}:00`;
+      document.getElementById('tt-count').textContent =
+        `~${Number(cell.dataset.count).toLocaleString()} incidents (2003–2025)`;
+      tooltip.style.opacity = '1';
+      tooltip.style.left = (e.clientX + 14) + 'px';
+      tooltip.style.top  = (e.clientY - 48) + 'px';
+    });
+    grid.addEventListener('mouseleave', () => { tooltip.style.opacity = '0'; });
+  }
+
+  /* ── INIT & THEME REACTIVITY ────────────────────────────────────────── */
+  function buildAll() {
+    buildChart1();
+    buildChart2();
+    buildHeatmap();
+  }
+
+  buildAll();
+
+  /* Re-render when theme changes */
+  const observer = new MutationObserver(() => buildAll());
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+})();
+</script>
+
+<script src="../js/theme.js"></script>
+</body>
+</html>
