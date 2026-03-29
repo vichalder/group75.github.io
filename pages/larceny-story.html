@@ -471,7 +471,9 @@
 
     <div class="figure-card">
       <div class="chart-wrap">
-        <canvas id="chart1" height="280"></canvas>
+        <img src="../larceny_timeseries.png"
+             alt="Larceny Theft in San Francisco, 2003–2025"
+             style="width:100%;height:auto;display:block;">
       </div>
     </div>
     <p class="figure-caption">
@@ -696,69 +698,8 @@
     };
   }
 
-  /* ── CHART 1: Yearly larceny bar chart ─────────────────────────────── */
-  let chart1, chart2;
-
-  function buildChart1() {
-    const ctx = document.getElementById('chart1').getContext('2d');
-    const tc  = themeColors();
-
-    if (chart1) chart1.destroy();
-    chart1 = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: YEARS,
-        datasets: [{
-          data: COUNTS,
-          backgroundColor: YEARS.map(y => (y >= 2012 && y <= 2019) ? tc.barAccent : tc.barOther),
-          borderRadius: 3,
-          borderSkipped: false,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        animation: { duration: 600 },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: isDark() ? 'rgba(14,6,6,0.95)' : 'rgba(255,255,255,0.95)',
-            titleColor: isDark() ? '#f5e8e8' : '#1a0808',
-            bodyColor:  isDark() ? '#a08888' : '#7c3030',
-            borderColor: 'rgba(239,68,68,0.3)',
-            borderWidth: 1,
-            padding: 10,
-            callbacks: {
-              title: items => `${items[0].label}`,
-              label: item => `  ${item.raw.toLocaleString()} larceny incidents`,
-            }
-          }
-        },
-        scales: {
-          x: {
-            ticks: {
-              color: tc.axisText, font: { size: 10 },
-              maxRotation: 45,
-            },
-            grid: { color: tc.grid },
-          },
-          y: {
-            ticks: {
-              color: tc.axisText, font: { size: 10 },
-              callback: v => v >= 1000 ? (v/1000).toFixed(0)+'k' : v,
-            },
-            grid: { color: tc.grid },
-            title: {
-              display: true,
-              text: 'Larceny Theft Incidents',
-              color: tc.axisText,
-              font: { size: 10 },
-            }
-          }
-        }
-      }
-    });
-  }
+  /* ── CHART 2 & HEATMAP ──────────────────────────────────────────────── */
+  let chart2;
 
   /* ── CHART 2: District risk ratio (horizontal bar) ─────────────────── */
   function buildChart2() {
@@ -944,7 +885,6 @@
 
   /* ── INIT & THEME REACTIVITY ────────────────────────────────────────── */
   function buildAll() {
-    buildChart1();
     buildChart2();
     buildHeatmap();
   }
