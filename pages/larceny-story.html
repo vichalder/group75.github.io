@@ -535,8 +535,11 @@
     </p>
 
     <div class="figure-card">
-      <div class="chart-wrap">
-        <canvas id="chart2" height="320"></canvas>
+      <div class="chart-wrap" style="padding:0;height:620px;">
+        <iframe src="../interactive_plots/crime_heatmap.html"
+                style="width:100%;height:100%;border:none;"
+                loading="lazy"
+                title="Larceny theft map by year"></iframe>
       </div>
     </div>
     <p class="figure-caption">
@@ -581,14 +584,10 @@
       dark. Reported larceny in San Francisco is most visible when urban activity is most visible too.
     </p>
 
-    <div class="figure-card">
-      <div id="heatmap-container"></div>
-      <div class="heatmap-legend">
-        <span>Fewer incidents</span>
-        <div class="legend-bar"></div>
-        <span>More incidents</span>
-      </div>
-    </div>
+ 
+      <iframe src="../interactive_plots/heatmap-figure.html" id="heatmap-iframe"
+          style="border:none;width:100%;height:320px;background:transparent;"
+          scrolling="no" title="Larceny heatmap"></iframe>
     <p class="figure-caption">
       <strong>Figure 3.</strong> Heatmap of reported larceny theft by day of week and hour of day from 2003
       to 2025. Darker cells indicate more recorded incidents. The strongest pattern is a broad afternoon
